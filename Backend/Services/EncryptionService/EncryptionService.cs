@@ -16,17 +16,27 @@ namespace Backend.Services
     {
         private readonly CertificateService _certificateRefreshService;
         private readonly string _encryptionKey;
-        private TelemetryClient _telemetryClient;
+        private readonly TelemetryClient _telemetryClient;
+        private readonly bool _useCertificates;
 
         public EncryptionService(IServiceProvider serviceProvider, IConfiguration configuration, TelemetryClient telemetryClient)
         {
             _certificateRefreshService = serviceProvider.GetService<CertificateService>();
             _encryptionKey = configuration["AppInsights:EncryptionKey"];
             _telemetryClient = telemetryClient;
+            if (bool.TryParse(configuration["AppInsights:UseCertificates"], out bool useCertificates))
+            {
+                _useCertificates = useCertificates;
+            }          
         }
 
         public string EncryptString(string apiKey)
         {
+            if (!_useCertificates)
+            {
+                return EncryptStringLegacy(apiKey);
+            }
+
             X509Certificate2? certificate = _certificateRefreshService.GetCertificate();
             using var rsa = certificate.GetRSAPublicKey();
             var byteArray = rsa.Encrypt(Encoding.UTF8.GetBytes(apiKey), RSAEncryptionPadding.OaepSHA256);
@@ -35,6 +45,17 @@ namespace Backend.Services
 
         public AppInsightsDecryptionResponse DecryptString(string encryptedString)
         {
+            if (!_useCertificates)
+            {
+                var legacyResponse = new AppInsightsDecryptionResponse()
+                {
+                    UsingExpiredKeyOrCertificate = true,
+                    ApiKey = DecryptStringLegacy(encryptedString)
+                };
+
+                return legacyResponse;
+            }
+
             var response = new AppInsightsDecryptionResponse();
             var data = Convert.FromBase64String(encryptedString);
             X509Certificate2? cert = _certificateRefreshService.GetCertificate();
@@ -80,6 +101,34 @@ namespace Backend.Services
             return response;
         }
 
+        private string DecryptUsingCertificate(X509Certificate2? cert, byte[]? data)
+        {
+            if (cert == null)
+            {
+                throw new Exception("Failed to load the certificate to decrypt");
+            }
+
+            _telemetryClient.TrackTrace($"Trying to decrypt data using {cert.Thumbprint} {cert.Subject}");
+            using var rsa = cert.GetRSAPrivateKey();
+            try
+            {
+                var byteArray = rsa.Decrypt(data, RSAEncryptionPadding.OaepSHA256);
+                _telemetryClient.TrackTrace($"Decrypted data successfully using {cert.Thumbprint} {cert.Subject}");
+                return Encoding.UTF8.GetString(byteArray);
+            }
+            catch (Exception ex)
+            {
+                _telemetryClient.TrackTrace($"Failed to decrypt using certificate {cert.Thumbprint} {cert.Subject}",
+                    new Dictionary<string, string>()
+                    {
+                        {"exceptionMessage", ex.Message}
+                    }
+                );
+            }
+
+            return string.Empty;
+        }
+
         private string DecryptStringLegacy(string encryptedString)
         {
             byte[] iv = new byte[16];
@@ -104,32 +153,32 @@ namespace Backend.Services
             }
         }
 
-        private string DecryptUsingCertificate(X509Certificate2? cert, byte[]? data)
+        private string EncryptStringLegacy(string jsonPayload)
         {
-            if (cert == null)
-            {
-                throw new Exception("Failed to load the certificate to decrypt");
-            }
+            byte[] iv = new byte[16];
+            byte[] array;
 
-            _telemetryClient.TrackTrace($"Trying to decrypt data using {cert.Thumbprint} {cert.Subject}");
-            using var rsa = cert.GetRSAPrivateKey();
-            try
+            using (Aes aes = Aes.Create())
             {
-                var byteArray = rsa.Decrypt(data, RSAEncryptionPadding.OaepSHA256);
-                _telemetryClient.TrackTrace($"Decrypted data successfully using {cert.Thumbprint} {cert.Subject}");
-                return Encoding.UTF8.GetString(byteArray);
-            }
-            catch (Exception ex)
-            {
-                _telemetryClient.TrackTrace($"Failed to decrypt using certificate {cert.Thumbprint} {cert.Subject}", 
-                    new Dictionary<string, string>()
+                aes.Key = Encoding.UTF8.GetBytes(_encryptionKey);
+                aes.IV = iv;
+
+                ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    using (CryptoStream cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
                     {
-                        {"exceptionMessage", ex.Message}
-                    }
-                );
-            }
+                        using (StreamWriter streamWriter = new StreamWriter(cryptoStream))
+                        {
+                            streamWriter.Write(jsonPayload);
+                        }
 
-            return string.Empty;
+                        array = memoryStream.ToArray();
+                    }
+                }
+            }
+            return Convert.ToBase64String(array);
         }
     }
 }
