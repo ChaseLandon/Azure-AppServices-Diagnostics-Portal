@@ -47,7 +47,7 @@ export class AppInsightsQueryService {
         return null;
     }
 
-    updateAppInsightsAppSettings(encryptedKey: string, appId: string): Observable<any> {
+    updateAppInsightsEncryptedKeyInAppSettings(encryptedKey: string, appId: string): Observable<any> {
         return null;
     }
 
@@ -60,6 +60,10 @@ export class AppInsightsQueryService {
     }
 
     getAppInsightsApiKeysCount(): Observable<number> {
+        return null;
+    }
+
+    getAppInsightsConnected(resourceId: string): Observable<boolean> {
         return null;
     }
 }

@@ -40,7 +40,7 @@ export class AppInsightsService {
     //
     // Should be enabled only POST ANT 99 deployment finishes everywhere
     //
-    private useAppSettingsForAppInsightEncryption: boolean = true;
+    private useAppSettingsForAppInsightEncryption: boolean = false;
     private appInsightsEncryptedAppSettingName: string = 'WEBSITE_APPINSIGHTS_ENCRYPTEDAPIKEY';
 
     public appInsightsSettings: any = {
@@ -339,26 +339,16 @@ export class AppInsightsService {
             }),
             mergeMap(encryptedKey => {
                 if (encryptedKey) {
-                    return this.getUpdatedTags(resourceUri, encryptedKey, appId).map(updatedTags => {
-                        return updatedTags;
-                    });
-                }
-            }),
-            mergeMap(updatedTags => {
-                if (updatedTags) {
-                    return this.armService.patchResourceFullResponse(resourceUri, { tags: updatedTags }, true, apiVersion)
-                        .pipe(
-                            catchError(err => {
-                                return throwError("Failed while updating ARM tags for the resource - " + err);
-                            })
-                        ).map(patchTagsResponse => {
-                            return patchTagsResponse;
-                        });
+                    if (this.useAppSettingsForAppInsightEncryption) {
+                        return this.updateAppInsightsEncryptedKeyInAppSettings(encryptedKey, appId);
+                    } else {
+                        return this.updateAppInsightsEncryptedKeyInArmTag(resourceUri, encryptedKey, appId);
+                    }
                 }
             }));
     }
 
-    public updateAppInsightsAppSettings(encryptedKey: string, appId: string): Observable<boolean> {
+    public updateAppInsightsEncryptedKeyInAppSettings(encryptedKey: string, appId: string): Observable<boolean> {
         let settingValue = JSON.stringify({ ApiKey: encryptedKey, AppId: appId });
         if (!this.useAppSettingsForAppInsightEncryption) {
             return of(false);
@@ -379,16 +369,58 @@ export class AppInsightsService {
         );
     }
 
+    public getAppInsightsConnected(resourceId: string): Observable<boolean> {
+        if (this.useAppSettingsForAppInsightEncryption) {
+            return this.siteService.getSiteAppSettings(this.subscriptionId, this.resourceGroup, this.siteName, this.slotName).pipe(
+                map(settingsResponse => {
+
+                    if (settingsResponse && settingsResponse.properties[this.appInsightsEncryptedAppSettingName]) {
+                        return true;
+                    }
+                    return false;
+                }));
+        } else {
+            let url = resourceId;
+            return this.armService.getResource<ResponseMessageEnvelope<any>>(url, '2018-02-01', true).pipe(map((data: ResponseMessageEnvelope<any>) => {
+                let resource = data;
+                let appInsightsConnected = false;
+                if (resource.tags && resource.tags['hidden-related:diagnostics/applicationInsightsSettings']) {
+                    appInsightsConnected = true;
+                }
+                return appInsightsConnected;
+            }));
+        }
+
+    }
+
+    private updateAppInsightsEncryptedKeyInArmTag(resourceUri: string, encryptedKey: string, appId: string): Observable<any> {
+        return this.getUpdatedTags(resourceUri, encryptedKey, appId).pipe(
+            map(updatedTags => {
+                return updatedTags;
+            }),
+            mergeMap(updatedTags => {
+                return this.armService.patchResourceFullResponse(resourceUri, { tags: updatedTags }, true, apiVersion).pipe(
+                    map(patchTagsResponse => {
+                        return patchTagsResponse;
+                    }),
+                    catchError(err => {
+                        return throwError("Failed while updating ARM tags for the resource - " + err);
+                    }));
+
+            }));
+    }
+
     private getExistingTags(resourceUri: string): Observable<{ [key: string]: string }> {
         return this.armService.getResourceFullResponse(resourceUri, true, apiVersion)
             .pipe(
+                map(response => {
+                    let armResource = <ArmResource>response.body;
+                    return armResource.tags;
+                }),
                 catchError(err => {
                     return throwError("Failed while getting ARM tags for the resource - " + err);
                 })
-            ).map(response => {
-                let armResource = <ArmResource>response.body;
-                return armResource.tags;
-            });
+            );
     }
 
     private getUpdatedTags(resourceUri: string, encryptedKey: string, appId: string) {
@@ -415,7 +447,7 @@ export class AppInsightsService {
                 }
             }),
             mergeMap(appInsightsSettingsJson => {
-                if (appInsightsSettingsJson != null) {
+                if (appInsightsSettingsJson != null && this.useAppSettingsForAppInsightEncryption) {
                     return of(appInsightsSettingsJson);
                 } else {
                     return this.getAppInsightsArmTag(resourceUri);

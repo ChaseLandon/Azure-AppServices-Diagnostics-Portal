@@ -49,7 +49,7 @@ export class AppInsightsEnablementComponent implements OnInit {
 
           if (this.isAppInsightsEnabled) {
             this._appInsightsService.logAppInsightsEvent(this.resourceId, TelemetryEventNames.AppInsightsEnabled);
-            this._settingsService.getAppInsightsConnected().subscribe(connected => {
+            this._appInsightsService.getAppInsightsConnected(this.resourceId).subscribe(connected => {
               if (connected) {
                 this._appInsightsService.logAppInsightsEvent(this.resourceId, TelemetryEventNames.AppInsightsAlreadyConnected);
                 this.isAppInsightsConnected = true;
@@ -59,8 +59,8 @@ export class AppInsightsEnablementComponent implements OnInit {
                     this._backendCtrlService.get<any>(`api/appinsights/validate`, additionalHeaders, true).subscribe(resp => {
                       if (resp.isValid === true) {
                         this.appInsightsValidated = true;
-                        if (resp.updatedEncryptionBlob != null) {
-                          this._appInsightsService.updateAppInsightsAppSettings(resp.updatedEncryptionBlob, storedResponse.AppId).subscribe(appSettingUpdated => {
+                        if (resp.updatedEncryptionBlob != null && resp.updatedEncryptionBlob.length > 1) {
+                          this._appInsightsService.updateAppInsightsEncryptedKeyInAppSettings(resp.updatedEncryptionBlob, storedResponse.AppId).subscribe(appSettingUpdated => {
                             if (appSettingUpdated) {
                               this._appInsightsService.logAppInsightsEvent(this.resourceId, TelemetryEventNames.AppInsightsAppSettingsUpdatedWithLatestSecret);
                             }
