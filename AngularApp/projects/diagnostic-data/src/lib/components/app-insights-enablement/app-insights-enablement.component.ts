@@ -33,7 +33,7 @@ export class AppInsightsEnablementComponent implements OnInit {
   hasWriteAccess: boolean = false;
   isEnabledInProd: boolean = true;
   messageBarType = MessageBarType.info;
-  canCreateApiKeys:boolean = false;
+  canCreateApiKeys: boolean = false;
 
   @Input()
   resourceId: string = "";
@@ -53,14 +53,25 @@ export class AppInsightsEnablementComponent implements OnInit {
               if (connected) {
                 this._appInsightsService.logAppInsightsEvent(this.resourceId, TelemetryEventNames.AppInsightsAlreadyConnected);
                 this.isAppInsightsConnected = true;
-                this._appInsightsService.getAppInsightsArmTag(this.resourceId).subscribe(tagResponse => {
-                  if (tagResponse && tagResponse.AppId && tagResponse.ApiKey) {
-                    const additionalHeaders = new HttpHeaders({ 'appinsights-app-id': tagResponse.AppId, 'appinsights-encryptedkey': tagResponse.ApiKey });
-                    this._backendCtrlService.get<any>(`api/appinsights/validate`, additionalHeaders).subscribe(resp => {
-                      if (resp === true) {
+                this._appInsightsService.getAppInsightsStoredConfiguration(this.resourceId).subscribe(storedResponse => {
+                  if (storedResponse && storedResponse.AppId && storedResponse.ApiKey) {
+                    const additionalHeaders = new HttpHeaders({ 'appinsights-app-id': storedResponse.AppId, 'appinsights-encryptedkey': storedResponse.ApiKey });
+                    this._backendCtrlService.get<any>(`api/appinsights/validate`, additionalHeaders, true).subscribe(resp => {
+                      if (resp.isValid === true) {
                         this.appInsightsValidated = true;
+                        if (resp.updatedEncryptionBlob != null) {
+                          this._appInsightsService.updateAppInsightsAppSettings(resp.updatedEncryptionBlob, storedResponse.AppId).subscribe(appSettingUpdated => {
+                            if (appSettingUpdated) {
+                              this._appInsightsService.logAppInsightsEvent(this.resourceId, TelemetryEventNames.AppInsightsAppSettingsUpdatedWithLatestSecret);
+                            }
+                            this.loadingSettings = false;
+                          }, error => {
+                            this.loadingSettings = false;
+                          });
+                        } else {
+                          this.loadingSettings = false;
+                        }
                       }
-                      this.loadingSettings = false;
                     }, error => {
                       this.loadingSettings = false;
                       this._appInsightsService.logAppInsightsEvent(this.resourceId, TelemetryEventNames.AppInsightsConfigurationInvalid);

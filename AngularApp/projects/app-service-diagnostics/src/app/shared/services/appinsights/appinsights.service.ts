@@ -37,6 +37,9 @@ export class AppInsightsService {
     public loadAppDiagnosticPropertiesObservable: BehaviorSubject<boolean>;
     public applicationInsightsValidForApp: BehaviorSubject<boolean>;
 
+    private useAppSettingsForAppInsightEncryption: boolean = true;
+    private appInsightsEncryptedAppSettingName: string = 'WEBSITE_APPINSIGHTS_ENCRYPTEDAPIKEY';
+
     public appInsightsSettings: any = {
         validForStack: undefined,
         enabledForWebApp: undefined,
@@ -352,6 +355,25 @@ export class AppInsightsService {
             }));
     }
 
+    public updateAppInsightsAppSettings(encryptedKey: string, appId: string): Observable<boolean> {
+        let settingValue = JSON.stringify({ ApiKey: encryptedKey, AppId: appId });
+        if (!this.useAppSettingsForAppInsightEncryption) {
+            return of(false);
+        } else {
+            return of(true);
+        }
+
+        // this.siteService.getSiteAppSettings(this.subscriptionId, this.resourceGroup, this.siteName, this.slotName).pipe(
+        //     map(settingsResponse => {
+        //         settingsResponse.properties[this.appInsightsEncryptedAppSettingName] = settingValue;
+        //         this.siteService.updateSiteAppSettings(this.subscriptionId, this.resourceGroup, this.siteName, this.slotName, settingsResponse).pipe(
+        //             map(updateResponse => {
+        //                 return true;
+        //             }));
+        //     }));
+
+    }
+
     private getExistingTags(resourceUri: string): Observable<{ [key: string]: string }> {
         return this.armService.getResourceFullResponse(resourceUri, true, apiVersion)
             .pipe(
@@ -375,6 +397,28 @@ export class AppInsightsService {
                 return newTags;
             }
         });
+    }
+
+    public getAppInsightsStoredConfiguration(resourceUri: string): Observable<any> {
+        return this.siteService.getSiteAppSettings(this.subscriptionId, this.resourceGroup, this.siteName, this.slotName).pipe(
+            map((settingsResponse) => {
+                if (settingsResponse.properties && settingsResponse.properties[this.appInsightsEncryptedAppSettingName]) {
+                    var appInsightsSettingsJson = JSON.parse(settingsResponse.properties[this.appInsightsEncryptedAppSettingName]);
+                    return appInsightsSettingsJson;
+                } else {
+                    return null;
+                }
+            }),
+            mergeMap(appInsightsSettingsJson => {
+                console.log("appsettingsJson = " + JSON.stringify(appInsightsSettingsJson));
+                if (appInsightsSettingsJson != null) {
+                    return of(appInsightsSettingsJson);
+                } else {
+                    return this.getAppInsightsArmTag(resourceUri);
+                }
+
+            })
+        );
     }
 
     public getAppInsightsArmTag(resourceUri: string): Observable<any> {

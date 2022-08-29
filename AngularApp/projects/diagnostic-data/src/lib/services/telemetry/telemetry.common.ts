@@ -58,6 +58,7 @@ export const TelemetryEventNames = {
     AppInsightsResourceMissingWriteAccess: 'AppInsightsResourceMissingWriteAccess',
     AppInsightsMaxApiKeysExceeded: 'AppInsightsMaxApiKeysExceeded',
     AppInsightsConfigurationInvalid: 'AppInsightsConfigurationInvalid',
+    AppInsightsAppSettingsUpdatedWithLatestSecret: 'AppInsightsAppSettingsUpdatedWithLatestSecret',
     SummaryCardClicked: 'SummaryCardClicked',
     ToolCardClicked: 'ToolCardClicked',
     TimePickerApplied: 'TimePickerApplied',
