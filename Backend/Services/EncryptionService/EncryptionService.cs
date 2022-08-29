@@ -27,7 +27,7 @@ namespace Backend.Services
             if (bool.TryParse(configuration["AppInsights:UseCertificates"], out bool useCertificates))
             {
                 _useCertificates = useCertificates;
-            }          
+            }
         }
 
         public string EncryptString(string apiKey)

@@ -17,6 +17,7 @@ namespace Backend.Services
 {
     public class CertificateService : IHostedService, IDisposable
     {
+        private const string ExceptionMessageFeatureDisabled = "The feature to use X509Certificates for encryption is not enabled yet";
         private readonly string _certificateName;
         private readonly string _certificateRefreshIntervalInMinutes;
         private readonly string _keyVaultUri;
@@ -25,6 +26,7 @@ namespace Backend.Services
         private readonly TelemetryClient _telemetryClient;
         private Timer? _timer = null;
         private X509Certificate2? _currentCertificate;
+        private readonly bool _useCertificates = false;
         private readonly ConcurrentDictionary<string, X509Certificate2> _expiredCertificatesCache = new ConcurrentDictionary<string, X509Certificate2>();
         private readonly int _maxExpiredCertificateCount = 5;
 
@@ -41,15 +43,30 @@ namespace Backend.Services
             {
                 _maxExpiredCertificateCount = maxExpiredCertificateCount;
             }
+
+            if (bool.TryParse(configuration["AppInsights:UseCertificates"], out bool useCertificates))
+            {
+                _useCertificates = useCertificates;
+            }
         }
 
         public X509Certificate2? GetCertificate()
         {
+            if (!_useCertificates)
+            {
+                throw new InvalidOperationException(ExceptionMessageFeatureDisabled);
+            }
+
             return _currentCertificate;
         }
 
         public List<X509Certificate2> GetExpiredCertificates()
         {
+            if (!_useCertificates)
+            {
+                throw new InvalidOperationException(ExceptionMessageFeatureDisabled);
+            }
+
             return _expiredCertificatesCache
                 .OrderByDescending(x => x.Value.NotAfter)
                 .Take(_maxExpiredCertificateCount)
@@ -65,7 +82,11 @@ namespace Backend.Services
                 refreshInterval = certificateRefreshIntervalInMinutes;
             }
 
-            _timer = new Timer(RefreshCertificates, null, TimeSpan.Zero, TimeSpan.FromMinutes(refreshInterval));
+            if (_useCertificates)
+            {
+                _timer = new Timer(RefreshCertificates, null, TimeSpan.Zero, TimeSpan.FromMinutes(refreshInterval));
+            }
+
             return Task.CompletedTask;
         }
 
