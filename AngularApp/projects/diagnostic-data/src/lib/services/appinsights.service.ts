@@ -47,7 +47,7 @@ export class AppInsightsQueryService {
         return null;
     }
 
-    updateAppInsightsEncryptedKeyInAppSettings(encryptedKey: string, appId: string): Observable<any> {
+    updateAppInsightsEncryptedAppSettings(encryptedKey: string, appId: string): Observable<any> {
         return null;
     }
 

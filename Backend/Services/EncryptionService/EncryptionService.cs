@@ -49,7 +49,7 @@ namespace Backend.Services
             {
                 var legacyResponse = new AppInsightsDecryptionResponse()
                 {
-                    UsingExpiredKeyOrCertificate = true,
+                    UsingExpiredKeyOrCertificate = false,
                     ApiKey = DecryptStringLegacy(encryptedString)
                 };
 

@@ -12,7 +12,6 @@
         public bool UsingExpiredKeyOrCertificate { get; set; } = false;
     }
 
-
     public class AppInsightsApiKeySettings
     {
         public string id { get; set; }

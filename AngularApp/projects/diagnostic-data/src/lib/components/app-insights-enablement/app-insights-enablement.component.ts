@@ -34,12 +34,14 @@ export class AppInsightsEnablementComponent implements OnInit {
   isEnabledInProd: boolean = true;
   messageBarType = MessageBarType.info;
   canCreateApiKeys: boolean = false;
+  appInsightsValiationError: string = "";
 
   @Input()
   resourceId: string = "";
 
   ngOnInit() {
     if (this.isEnabledInProd) {
+      this.appInsightsValiationError = "";
       this._appInsightsService.loadAppInsightsResourceObservable.subscribe(loadStatus => {
         if (loadStatus === true) {
           let appInsightsSettings = this._appInsightsService.appInsightsSettings;
@@ -60,7 +62,7 @@ export class AppInsightsEnablementComponent implements OnInit {
                       if (resp.isValid === true) {
                         this.appInsightsValidated = true;
                         if (resp.updatedEncryptionBlob != null && resp.updatedEncryptionBlob.length > 1) {
-                          this._appInsightsService.updateAppInsightsEncryptedKeyInAppSettings(resp.updatedEncryptionBlob, storedResponse.AppId).subscribe(appSettingUpdated => {
+                          this._appInsightsService.updateAppInsightsEncryptedAppSettings(resp.updatedEncryptionBlob, storedResponse.AppId).subscribe(appSettingUpdated => {
                             if (appSettingUpdated) {
                               this._appInsightsService.logAppInsightsEvent(this.resourceId, TelemetryEventNames.AppInsightsAppSettingsUpdatedWithLatestSecret);
                             }
@@ -74,7 +76,15 @@ export class AppInsightsEnablementComponent implements OnInit {
                       }
                     }, error => {
                       this.loadingSettings = false;
-                      this._appInsightsService.logAppInsightsEvent(this.resourceId, TelemetryEventNames.AppInsightsConfigurationInvalid);
+                      if (error.status === 403) {
+                        this._appInsightsService.logAppInsightsEvent(this.resourceId, TelemetryEventNames.AppInsightsConfigurationInvalid);
+                      } else {
+                        this._appInsightsService.logAppInsightsEvent(this.resourceId, TelemetryEventNames.AppInsightsFailedDuringKeyValidation);
+                        if (error.error) {
+                          this.appInsightsValiationError += " - " + error.error;
+                        }
+                      }
+
                     });
                   }
                 }, error => {

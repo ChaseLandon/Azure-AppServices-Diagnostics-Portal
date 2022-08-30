@@ -58,6 +58,10 @@ namespace Backend.Controllers
 
                 validationResponse = await _appInsightsService.Validate(appInsightsAppId, encryptedKey, siteHostName);
             }
+            catch (UnauthorizedAccessException unAex)
+            {
+                return StatusCode(403, unAex.Message);
+            }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
