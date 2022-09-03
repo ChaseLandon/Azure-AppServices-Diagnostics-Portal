@@ -63,6 +63,11 @@ namespace Backend.Services
 
             request.Headers.Add("x-api-key", apiKey ?? string.Empty);
             var response = await this._httpClient.SendAsync(request);
+            if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                throw new UnauthorizedAccessException();
+            }
+
             response.EnsureSuccessStatusCode();
             validationResponse.IsValid = true;
             return validationResponse;
