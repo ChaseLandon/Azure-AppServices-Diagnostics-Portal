@@ -633,6 +633,7 @@
             "imgSrc": "assets/img/normalicon.png",
             "versionPrefix": "",
             "azureCommImpactedServicesList": "",
+            "pesId": "16094",
             "staticSelfHelpContent": "",
             "searchSuffix": "VIRTUAL NETWORK GATEWAYS",
             "displayName": "Virtual Network Gateways"
