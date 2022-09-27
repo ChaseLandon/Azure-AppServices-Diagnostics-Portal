@@ -166,6 +166,12 @@ a:hover {
   background-color: var(--bodyBackground)!important;
 }
 
+.icm-template-permissions-dialog {
+  min-width: 50vw !important;
+  min-height: 20vh !important;
+  background-color: var(--bodyBackground)!important;
+}
+
 /* highchart container configuration */
 .highcharts-container {
   overflow: visible !important;

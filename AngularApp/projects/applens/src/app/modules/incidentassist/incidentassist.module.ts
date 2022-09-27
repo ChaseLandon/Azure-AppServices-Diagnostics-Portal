@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { IncidentValidationComponent } from './components/incidentvalidation/incidentvalidation.component';
 import { TemplateManagementComponent } from './components/template-management/template-management.component';
 import { ModuleWithProviders } from '@angular/compiler/src/core';
+import { NgxSmartModalModule } from 'ngx-smart-modal';
 import { RouterModule } from '@angular/router';
 import { SharedModule } from '../../shared/shared.module';
 import { FormsModule } from '@angular/forms';
-import { FabButtonModule, FabPanelModule, FabDropdownModule, FabTextFieldModule } from '@angular-react/fabric';
+import { FabButtonModule, FabPanelModule, FabDropdownModule, FabTextFieldModule, FabCommandBarModule } from '@angular-react/fabric';
 import {IncidentAssistanceService} from "./services/incident-assistance.service";
 import { HttpClientModule } from '@angular/common/http';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
@@ -29,6 +30,7 @@ export const IncidentAssistModuleRoutes : ModuleWithProviders = RouterModule.for
   imports: [
     CommonModule,
     MonacoEditorModule.forRoot(),
+    NgxSmartModalModule.forRoot(),
     IncidentAssistModuleRoutes,
     SharedModule,
     HttpClientModule,
@@ -37,6 +39,7 @@ export const IncidentAssistModuleRoutes : ModuleWithProviders = RouterModule.for
     FabPanelModule,
     FabDropdownModule,
     FabTextFieldModule,
+    FabCommandBarModule,
     DiagnosticDataModule
   ],
   providers: [IncidentAssistanceService],
