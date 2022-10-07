@@ -1,5 +1,22 @@
 using System;
 using System.Threading;
+
+[ArmResourceFilter(provider: "Microsoft.Network", resourceTypeName: "virtualNetworkGateways")]
+[Definition(Id = "YOUR_DETECTOR_ID", Name = "", Author = "YOUR_ALIAS", Description = "")]
+public async static Task<Response> Run(DataProviders dp, OperationContext<ArmResource> cxt, Response res)
+{
+    DataTable myData = await dp.Kusto.ExecuteClusterQuery(GetQuery(cxt), "TheCluster", "The Database", null, "jhats this gather");
+    res.Dataset.Add(new DiagnosticData()
+    {
+        Table = myData, 
+        RenderingProperties = new Rendering(RenderingType.Table){
+            Title = "Sample Table", 
+            Description = "Some description here"
+        }
+    });
+    return res;
+}
+
 private static string GetQuery(OperationContext<ArmResource> cxt)
 {
     return
@@ -10,18 +27,4 @@ private static string GetQuery(OperationContext<ArmResource> cxt)
 		| where TIMESTAMP >= startTime and TIMESTAMP <= endTime
 		YOUR_QUERY
 	";
-}
-[ArmResourceFilter(provider: "Microsoft.virtualNetworkGateways", resourceTypeName: "virtualNetworkGateways")]
-[Definition(Id = "YOUR_DETECTOR_ID", Name = "", Author = "YOUR_ALIAS", Description = "")]
-public async static Task<Response> Run(DataProviders dp, OperationContext<ArmResource> cxt, Response res)
-{
-    res.Dataset.Add(new DiagnosticData()
-    {
-        Table = await dp.Kusto.ExecuteClusterQuery(GetQuery(cxt), "KustoClusterName", "KustoDatabaseName", null, "GetQuery"), 
-        RenderingProperties = new Rendering(RenderingType.Table){
-            Title = "Sample Table", 
-            Description = "Some description here"
-        }
-    });
-    return res;
 }
