@@ -1,7 +1,7 @@
 import { Moment } from 'moment';
 import { BehaviorSubject } from 'rxjs';
 import {
-  Component, ComponentFactoryResolver, Input, OnInit, ViewChild, ViewContainerRef, Output, EventEmitter
+  Component, Input, OnInit, ViewChild, ViewContainerRef, Output, EventEmitter
 } from '@angular/core';
 import { DiagnosticData, Rendering, RenderingType } from '../../models/detector';
 import { CardSelectionComponent } from '../card-selection/card-selection.component';
@@ -50,14 +50,7 @@ import { ButtonStepComponent } from '../step-views/button-step-view/button-step.
 @Component({
   selector: 'dynamic-data',
   templateUrl: './dynamic-data.component.html',
-  styleUrls: ['./dynamic-data.component.scss'],
-  entryComponents: [
-    TimeSeriesGraphComponent, DataSummaryComponent, EmailComponent,
-    InsightsComponent, TimeSeriesInstanceGraphComponent, DynamicInsightComponent, MarkdownViewComponent,
-    DetectorListComponent, DropdownComponent, CardSelectionComponent, SolutionComponent, GuageControlComponent, FormComponent,
-    ChangeAnalysisOnboardingComponent, ChangesetsViewComponent, AppDependenciesComponent, AppInsightsMarkdownComponent, DetectorListAnalysisComponent, ConnectAppInsightsComponent, DetectorSearchComponent, SummaryCardsComponent, InsightsV4Component, DropdownV4Component, CardSelectionV4Component, DynamicInsightV4Component, DataTableV4Component, KeystoneInsightComponent, NotificationRenderingComponent, FabTabComponent, SectionsComponent,
-    StepViewsRendererComponent, InfoStepComponent, ButtonStepComponent, DropDownStepComponent, CheckStepComponent
-  ]
+  styleUrls: ['./dynamic-data.component.scss']
 })
 export class DynamicDataComponent implements OnInit {
 
@@ -108,7 +101,7 @@ export class DynamicDataComponent implements OnInit {
 
   @ViewChild('dynamicDataContainer', { read: ViewContainerRef, static: true }) dynamicDataContainer: ViewContainerRef;
   private isLegacy: boolean;
-  constructor(private componentFactoryResolver: ComponentFactoryResolver, private versionService: VersionService, private telemetryService: TelemetryService) { }
+  constructor(private versionService: VersionService, private telemetryService: TelemetryService) { }
 
   ngOnInit(): void {
     this.versionService.isLegacySub.subscribe(isLegacy => this.isLegacy = isLegacy);
@@ -123,11 +116,11 @@ export class DynamicDataComponent implements OnInit {
         this.telemetryService.logTrace(`No component found for rendering type : ${RenderingType[rendering]}`);
         return;
       }
-      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
+
       const viewContainerRef = this.dynamicDataContainer;
       viewContainerRef.clear();
 
-      const componentRef = viewContainerRef.createComponent(componentFactory);
+      const componentRef = viewContainerRef.createComponent(component);
       const instance = <DataRenderBaseComponent>(componentRef.instance);
       instance.diagnosticDataInput = diagnosticData;
       instance.startTime = this.startTime;
@@ -188,11 +181,10 @@ export class DynamicDataComponent implements OnInit {
       case RenderingType.SummaryCard:
         return SummaryCardsComponent;
       case RenderingType.SearchComponent:
-        if (!this.hideShieldComponent)
-        {
+        if (!this.hideShieldComponent) {
           return DetectorSearchComponent;
         }
-        else{
+        else {
           return null;
         }
       case RenderingType.AppInsightEnablement:

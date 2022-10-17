@@ -13,7 +13,7 @@
         </fab-command-bar>
         <div
         class="codeWindow">
-          <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="file" style="height:300px"></ngx-monaco-editor>
+          <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="files[i]" style="height:300px"></ngx-monaco-editor>
           <h5 *ngIf="queryResponse" style="font-weight: bold">Run output example</h5>
           <detector-view *ngIf="queryResponse" [detectorResponse]="queryResponse.invocationOutput"
             [startTime]="startTime" [endTime]="endTime" [error]="errorState" [showEdit]="false" [developmentMode]="true"

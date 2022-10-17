@@ -21,7 +21,7 @@
                           access App Insights information.
                         </td>
                         <td>
-                          <fab-primary-button contentClass="ml-2" (click)="connect()">
+                          <fab-primary-button [contentClass]="'ml-2'" (click)="connect()">
                             Connect
                           </fab-primary-button>
                         </td>
@@ -65,7 +65,7 @@
                           is no more
                           valid. Please connect again.</td>
                         <td>
-                          <fab-primary-button contentClass="ml-2" (click)="connect()">
+                          <fab-primary-button [contentClass]="'ml-2'" (click)="connect()">
                             Connect
                           </fab-primary-button>
                         </td>
@@ -110,7 +110,7 @@
                       <td> Enable Application insights for your app to collect application level monitoring data
                       </td>
                       <td>
-                        <fab-primary-button contentClass="ml-2" (click)="enable()">
+                        <fab-primary-button [contentClass]="'ml-2'" (click)="enable()">
                           Enable
                         </fab-primary-button>
                       </td>

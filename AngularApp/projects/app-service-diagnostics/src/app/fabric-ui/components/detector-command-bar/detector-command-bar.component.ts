@@ -268,6 +268,19 @@ export class DetectorCommandBarComponent implements AfterViewInit {
   }
 
   coachMarkViewed() {
+    if (!this.showTeachingBubble){
+      
+      //
+      // TeachingBubbles inherit from Callout react component and they have a 
+      // some issue in the current version of the libaray with *ngIf and they are
+      // not disposed properly. Due to this, the event keeps getting fired when a
+      //  user clicks anywhere in the portal. Avoid executing the rest of the function
+      //  if teachingBubble was already dismissed
+      //
+
+      return;
+    }
+
     const loggingError = new Error();
     // Stop showing TeachingBubble
     this.showTeachingBubble = false;
@@ -283,11 +296,25 @@ export class DetectorCommandBarComponent implements AfterViewInit {
       let _severityLevel: SeverityLevel = SeverityLevel.Warning;
       this.telemetryService.logException(loggingError, null, null, _severityLevel);
     }
+
+    this.removeTeachingBubbleFromDom();
   }
 
   showingTeachingBubble(){
     if (this.displayRPDFButton){
       this.showTeachingBubble = true;
+    }
+  }
+
+  //
+  // This is risky if we ever add another teaching bubble and if by
+  // any chance two teachingBubbles end up showing at the same time
+  //
+
+  removeTeachingBubbleFromDom() {
+    const htmlElements = document.querySelectorAll<HTMLElement>('.ms-Callout.ms-TeachingBubble');
+    if (htmlElements.length > 0) {
+      htmlElements[0].parentElement.remove();
     }
   }
 }

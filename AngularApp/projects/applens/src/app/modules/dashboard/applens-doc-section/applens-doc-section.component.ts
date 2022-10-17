@@ -1,4 +1,3 @@
-import { ICommandBarItemOptions } from '@angular-react/fabric';
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { inputControlHeight } from '@uifabric/azure-themes/lib/azure/Constants';

@@ -26,7 +26,7 @@ export class FormComponent extends DataRenderBaseComponent {
   directionalHint = DirectionalHint.topLeftEdge;
 
 
-  @ViewChild ('formDropdown', {static: false}) formdropDownRef: ElementRef<IDropdown>;
+  @ViewChild('formDropdown') formdropDownRef: ElementRef<IDropdown>;
   constructor(@Inject(DIAGNOSTIC_DATA_CONFIG) config: DiagnosticDataConfig, private _diagnosticService: DiagnosticService, private _router: Router, protected telemetryService: TelemetryService,
     private detectorControlService: DetectorControlService,
     private activatedRoute: ActivatedRoute,

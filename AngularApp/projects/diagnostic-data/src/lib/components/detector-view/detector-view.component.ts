@@ -460,7 +460,7 @@ export class DetectorViewComponent implements OnInit {
   selectFabricKey() {
     this.downtimeButtonStr = this.selectedDownTime.downTimeLabel;
     this.onDownTimeChange(this.selectedDownTime, DowntimeInteractionSource.Dropdown);
-    this.showDowntimeCallout = false;
+    this.closeDownTimeCallOut();
   }
 
   private getKeyForDownTime(d: DownTime): string {

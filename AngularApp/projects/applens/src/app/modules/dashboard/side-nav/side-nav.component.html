@@ -1,7 +1,7 @@
 <aside class="main-sidebar">
   <section class="sidebar" id="sidebar">
     <collapsible-menu theme="light">
-      <search-box tabindex="0" (searchValueChange)="updateSearch($event)" [searchValue]="searchValue"
+      <search-box tabindex="0" (searchValueChange)="updateSearch($event)"
         [ariaLabel]="searchAriaLabel"></search-box>
       <menu-scroll>
         <section-divider [label]="'Overview'" [selected]="isSectionHeaderSelected('')" [initiallyExpanded]="false"
@@ -25,7 +25,7 @@
             class="fa fa-spinner fa-spin fa-3x fa-fw loading-menu"></i>
         </section-divider>
         <section-divider [label]="'Develop'"
-          [selected]="isSectionHeaderSelected('users', false) || isSectionHeaderSelected('create') || isSectionHeaderSelected('creategist')"
+          [selected]="isSectionHeaderSelected('users', false) || isSectionHeaderSelected('create') || isSectionHeaderSelected('creategist') || isSectionHeaderSelected('createworkflow')"
           [initiallyExpanded]="false" [disableExpandIcon]="false">
           <i class="fa fa-code fa-fw menu-icon menu-icon-create" aria-hidden="true"></i>
           <collapsible-menu-item *ngFor="let item of createNew" [menuItem]="item"></collapsible-menu-item>

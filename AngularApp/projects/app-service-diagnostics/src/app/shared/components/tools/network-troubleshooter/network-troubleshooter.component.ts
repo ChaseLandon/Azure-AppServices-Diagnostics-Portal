@@ -30,7 +30,7 @@ export class NetworkTroubleshooterComponent extends DataRenderBaseComponent impl
     super.processData(data);
   }
   
-  @ViewChild('networkCheckingTool', { static: false }) networkCheckingToolDiv: any;
+  @ViewChild('networkCheckingTool') networkCheckingToolDiv: any;
   title: string = 'Network/Connectivity Troubleshooter';
   description: string = 'Check your network connectivity and troubleshoot network issues';
   stepFlowManager: StepFlowManager;

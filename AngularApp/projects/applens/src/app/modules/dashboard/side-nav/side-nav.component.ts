@@ -124,6 +124,19 @@ export class SideNavComponent implements OnInit {
         return this.currentRoutePath && this.currentRoutePath.join('/').toLowerCase() === `createGist`.toLowerCase();
       },
       icon: null
+    },
+    {
+      label: 'New Workflow',
+      id: "",
+      onClick: () => {
+        this.navigateTo('createWorkflow');
+      },
+      expanded: false,
+      subItems: null,
+      isSelected: () => {
+        return this.currentRoutePath && this.currentRoutePath.join('/').toLowerCase() === `createWorkflow`.toLowerCase();
+      },
+      icon: null
     }
   ];
 
@@ -291,7 +304,7 @@ export class SideNavComponent implements OnInit {
           });
           forkJoin(fileNamesObservables).subscribe(files => {
             let fileNames = []
-            files.forEach((f, filesIndex) => {
+            files.forEach((f:any, filesIndex) => {
               let folderList = [];
               f.folders.forEach(element => {
                 let fn = element.split('/').at(-1);
@@ -409,6 +422,8 @@ export class SideNavComponent implements OnInit {
 
 
   updateSearch(searchTerm: string) {
+    if(searchTerm === null || searchTerm === undefined) return;
+    if(searchTerm.length < 3 && searchTerm.length > 0) return;
     this.searchValue = searchTerm;
     this.categories = this.updateMenuItems(this.categoriesCopy, searchTerm);
     this.gists = this.updateMenuItems(this.gistsCopy, searchTerm);
@@ -460,7 +475,7 @@ export class SideNavComponent implements OnInit {
   }
 
   private checkMenuItemMatchesWithSearchTerm(item: CollapsibleMenuItem, searchValue: string) {
-    if (searchValue.length === 0) return true;
+    if (searchValue == null || searchValue.length === 0) return true;
     return StringUtilities.IndexOf(item.label.toLowerCase(), searchValue.toLowerCase()) >= 0 || StringUtilities.IndexOf(item.id.toLowerCase(), searchValue.toLowerCase()) >= 0;
   }
 

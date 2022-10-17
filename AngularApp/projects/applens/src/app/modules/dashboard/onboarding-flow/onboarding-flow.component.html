@@ -139,10 +139,7 @@
     <div class="callout-padding">
     <fab-dialog-content [title]="dialogTitle" [subText]="dialogSubText" [styles]="publishDialogStyles">
       <p>Branch Name: </p><p style="text-decoration: underline; font-weight: bold; word-wrap: break-word;">{{Branch}}</p>
-      <!-- <fab-text-field [label]="branchName" [(value)]="Branch" [placeholder]="branchPlaceholder"></fab-text-field> -->
-      <fab-text-field [label]="PRName" [(value)]="PRTitle" [placeholder]="PRPlaceholder" [required]="true"></fab-text-field>
-      <!-- <fab-text-field [label]="PRDescription" [(value)]="PRDesc" [placeholder]="PRDescriptionPlaceholder"
-        [required]="true" [multiline]="true"></fab-text-field> -->
+      <input type="text" [placeholder]="PRPlaceholder" [(ngModel)]="PRTitle" style="color: black; width:100%"/>
         <search-term-addition [allUtterances]="allUtterances" [recommendedUtterances]="recommendedUtterances"
         [utteranceInput]="utteranceInput" [detectorId]="id"></search-term-addition>
       <div style="border-top: 1px solid gray;" class="pt-3 pb-3 callout-padding">
@@ -173,7 +170,7 @@
     <fab-dialog-content [title]="deleteDialogTitle">
       <p>This action will remove the detector from the repo. Are you sure you want to delete?</p>
       <div class="mt-5">
-        <fab-primary-button text="Delete" (onClick)="deleteDetector()" contentClass="mr-3">
+        <fab-primary-button text="Delete" (onClick)="deleteDetector()" [contentClass]="'mr-3'">
         </fab-primary-button>
         <fab-default-button text="Cancel" (onClick)="dismissDeleteDialog()"></fab-default-button>
       </div>
@@ -210,12 +207,12 @@
               </div>
             </ng-template>    
             <div style="padding-top: 27px; padding-left: 20px;">
-            <fab-primary-button [disabled]="applyGistButtonDisabled" text="Apply Gist version" (onClick)="gistVersionChange()" contentClass="mr-3" >
+            <fab-primary-button [disabled]="applyGistButtonDisabled" text="Apply Gist version" (onClick)="gistVersionChange()" [contentClass]="'mr-3'" >
             </fab-primary-button>
            </div>
           </div>
           <div>
-            <fab-action-button contentStyle="padding-top: 27px;" type="button" [disabled]="refreshGistButtonDisabled" [iconProps]="refreshGistListButtonIcon" (click)="updateGistVersionOptions(pastGistEvent)">
+            <fab-action-button [contentStyle]="'padding-top: 27px;'" type="button" [disabled]="refreshGistButtonDisabled" [iconProps]="refreshGistListButtonIcon" (click)="updateGistVersionOptions(pastGistEvent)">
               Refresh gist version list
               </fab-action-button>
           </div>
@@ -307,7 +304,7 @@
     </fab-message-bar>
   </ng-container>
 
-  <fab-command-bar tabindex="0" [attr.id]="'fab-command-bar'" contentClass="fab-command-bar-class">
+  <fab-command-bar tabindex="0" [attr.id]="'fab-command-bar'" [contentClass]="'fab-command-bar-class'">
     <items>
       <!-- do not use *ngIf on these buttons  -->
       <fab-command-bar-item key="run" [text]="runButtonText" [iconProps]="runIcon" (click)="runCompilation()"
@@ -342,7 +339,7 @@
                 <fab-default-button id="develop-tab-branch-selector" (click)="branchToggleCallout()"
                   [styles]="branchButtonStyle" [ariaLabel]="displayName" [iconProps]="{ iconName: 'BranchSearch' }">
                   Branch: {{displayBranch}}</fab-default-button>
-                <fab-callout *ngIf="isCallOutVisible" (onDismiss)="closeCallout()" [setInitialFocus]="true"
+                <fab-callout [hidden]="!isCallOutVisible" (onDismiss)="closeCallout()" [setInitialFocus]="true"
                   [target]="'#develop-tab-branch-selector'">
                   <div class="callout-padding">
                     <div>
@@ -351,11 +348,11 @@
                     </div>
                     <div style="border-top: 1px solid gray;" class="pt-3 pb-3 callout-padding">
                       <fab-primary-button (onClick)="updateBranch()" (keyup.enter)="updateTableWithOptions()"
-                        [ariaLabel]="'Apply'" contentClass="mr-3 callout-button" contentStyle="border-radius: 2px;">
+                        [ariaLabel]="'Apply'" [contentClass]="'mr-3 callout-button'" [contentStyle]="'border-radius: 2px;'">
                         Apply
                       </fab-primary-button>
                       <fab-default-button (onClick)="closeCallout()" (keyup.enter)="closeCallout()"
-                        [ariaLabel]="'Cancel'" contentStyle="border-radius: 2px;">Cancel</fab-default-button>
+                        [ariaLabel]="'Cancel'" [contentStyle]="'border-radius: 2px;'">Cancel</fab-default-button>
                     </div>
                   </div>
                 </fab-callout>
